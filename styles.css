@@ -5,6 +5,7 @@
   --clr-primary: #4bba00;
   --clr-dark: #2c2c2c;
   --clr-accent: #4b4b4b;
+  --clr-accent2: #3b3b3b;
   --calc-width: 300px;
   --calc-height: 500px;
 }
@@ -31,13 +32,29 @@ body {
   border-radius: 10px;
   margin: 0 auto;
   display: flex;
+  flex-direction: column;
+}
+
+.display {
+  height: 120px;
+}
+
+.keys {
+  display: flex;
   flex-wrap: wrap;
+  background-color: white;
+  flex: 1;
 }
 
 .number-key,
-.operator-key {
+.operator-key,
+.other-key {
   border: 1px solid black;
   color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
 }
 
 .number-key {
@@ -46,6 +63,10 @@ body {
 
 .operator-key {
   background-color: var(--clr-primary);
+}
+
+.other-key {
+  background-color: var(--clr-accent2);
 }
 
 .zero-key {
