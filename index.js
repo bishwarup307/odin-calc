@@ -5,6 +5,10 @@ const keysContainer = document.querySelector(".keys-container");
 const display = document.querySelector(".display-container");
 const liveCalc = document.querySelector(".calc");
 
+let firstNumber = 0;
+let secondNumber;
+let operands = [];
+
 const SYMBOLS = [
     { text: "AC", id: "ac" },
     { text: "+/-", id: "sign" },
@@ -35,6 +39,28 @@ function findDisplayText(keyId) {
     assignedKey = SYMBOLS.find((item) => item.id === id);
     return assignedKey.text;
 }
+
+const calculate = function (num1, num2, op) {
+    {
+        switch (op) {
+            case "plus":
+                return num1 + num2;
+
+            case "minus":
+                return num1 - num2;
+
+            case "multiply":
+                return num1 * num2;
+
+            case "divide":
+                if (num2 === 0) {
+                    alert("Ugly baby judges you!");
+                    return;
+                }
+                return num1 / num2;
+        }
+    }
+};
 
 // Builds the keys on the calculator
 function makeKeyGrid() {
@@ -124,7 +150,35 @@ window.addEventListener("keyup", (event) => {
     if (elem) elem.click();
 });
 
+let buffer = "";
+let displayText;
+
 keysContainer.addEventListener("click", (event) => {
+    // displayText = findDisplayText(event.target.id);
+
+    // debugger;
     displayText = findDisplayText(event.target.id);
     liveCalc.innerHTML += displayText;
+
+    if (event.target.classList.contains("number-key")) {
+        buffer += displayText;
+    } else {
+        operands.push(event.target.id.split("-")[1]);
+
+        if (operands.length === 0) return;
+
+        if (operands.length === 1) {
+            firstNumber = parseFloat(buffer);
+            buffer = "";
+        } else {
+            secondNumber = parseFloat(buffer);
+            firstNumber = calculate(firstNumber, secondNumber, operands[0]);
+            secondNumber = null;
+            buffer = "";
+            operands.shift();
+        }
+    }
+    console.log("first number: " + firstNumber);
+    console.log("second number: " + secondNumber);
+    console.log(operands);
 });
