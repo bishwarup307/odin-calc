@@ -29,18 +29,9 @@ const SYMBOLS = [
 const OPERATORS = ["plus", "minus", "multiply", "divide", "equal"];
 const OTHERS = ["ac", "sign", "percent"];
 
+// Builds the keys on the calculator
 function makeKeyGrid() {
     const placeHolder = document.createDocumentFragment();
-
-    // styles = getComputedStyle(document.body)
-
-    // const displayHeight = getComputedStyle(display).getPropertyValue("height")
-
-    // const allocatedWidth = styles.getPropertyValue("--calc-width")
-    // const allocatedHeight = styles.getPropertyValue("--calc-height") - displayHeight;
-
-    // const cellWidth = allocatedWidth / 4    // 4 columns per row
-    // const cellHeight = allocatedHeight / 5  // 5 rows per column
 
     SYMBOLS.forEach((symbol) => {
         key = document.createElement("div");
@@ -64,4 +55,64 @@ function makeKeyGrid() {
     keysContainer.appendChild(placeHolder);
 }
 
+function keyDownEffect(event) {
+    event.target.style.opacity = 0.6;
+}
+
+function keyUpEffect(event) {
+    setTimeout(() => (event.target.style.opacity = 1), 90);
+}
+
 makeKeyGrid();
+
+// We are assigning keyboard keys to the buttons to make
+// user able to type their expression in addition to
+// clicking the key buttons
+keysContainer.addEventListener("click", keyDownEffect);
+keysContainer.addEventListener("click", keyUpEffect);
+
+window.addEventListener("keyup", (event) => {
+    let elem;
+
+    switch (event.key) {
+        case ".":
+            elem = document.querySelector("#key-decimal");
+            break;
+
+        case "c":
+            elem = document.querySelector("#key-ac");
+            break;
+
+        case "Enter":
+            elem = document.querySelector("#key-equal");
+            break;
+
+        case "=":
+        case "+":
+            elem = document.querySelector("#key-plus");
+            break;
+
+        case "-":
+        case "_":
+            elem = document.querySelector("#key-minus");
+            break;
+
+        case "/":
+            elem = document.querySelector("#key-divide");
+            break;
+
+        case "*":
+        case "x":
+            elem = document.querySelector("#key-multiply");
+            break;
+
+        case "%":
+            elem = document.querySelector("#key-percent");
+            break;
+
+        default:
+            elem = document.querySelector(`#key-${event.key}`);
+    }
+
+    if (elem) elem.click();
+});
