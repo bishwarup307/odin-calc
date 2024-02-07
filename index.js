@@ -3,6 +3,7 @@ const MULTIPLY_TEXT = "&times";
 
 const keysContainer = document.querySelector(".keys-container");
 const display = document.querySelector(".display-container");
+const liveCalc = document.querySelector(".calc");
 
 const SYMBOLS = [
     { text: "AC", id: "ac" },
@@ -28,6 +29,12 @@ const SYMBOLS = [
 
 const OPERATORS = ["plus", "minus", "multiply", "divide", "equal"];
 const OTHERS = ["ac", "sign", "percent"];
+
+function findDisplayText(keyId) {
+    const id = keyId.split("-")[1];
+    assignedKey = SYMBOLS.find((item) => item.id === id);
+    return assignedKey.text;
+}
 
 // Builds the keys on the calculator
 function makeKeyGrid() {
@@ -115,4 +122,9 @@ window.addEventListener("keyup", (event) => {
     }
 
     if (elem) elem.click();
+});
+
+keysContainer.addEventListener("click", (event) => {
+    displayText = findDisplayText(event.target.id);
+    liveCalc.innerHTML += displayText;
 });

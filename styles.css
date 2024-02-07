@@ -38,6 +38,23 @@ body {
 
 .display-container {
     height: var(--display-height);
+    display: flex;
+    flex-direction: column;
+    padding: 4px 1rem 4px 1rem;
+}
+
+.history {
+    flex: 1;
+}
+
+.calc {
+    flex: 2;
+    font-size: 3rem;
+    font-weight: 300;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    color: var(--clr-lightbg);
 }
 
 .keys-container {
