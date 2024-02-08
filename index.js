@@ -10,44 +10,44 @@ let secondNumber;
 let operands = [];
 
 const SYMBOLS = [
-    { text: "AC", id: "ac" },
-    { text: "+/-", id: "sign" },
-    { text: "%", id: "percent" },
-    { text: DIVIDE_TEXT, id: "divide" },
-    { text: 7 },
-    { text: 8 },
-    { text: 9 },
-    { text: MULTIPLY_TEXT, id: "multiply" },
-    { text: 4 },
-    { text: 5 },
-    { text: 6 },
-    { text: "-", id: "minus" },
-    { text: 1 },
-    { text: 2 },
-    { text: 3 },
-    { text: "+", id: "plus" },
-    { text: 0 },
-    { text: ".", id: "decimal" },
-    { text: "=", id: "equal" },
+  { text: "AC", id: "ac" },
+  { text: "+/-", id: "sign" },
+  { text: "%", id: "percent" },
+  { text: DIVIDE_TEXT, id: "divide" },
+  { text: 7 },
+  { text: 8 },
+  { text: 9 },
+  { text: MULTIPLY_TEXT, id: "multiply" },
+  { text: 4 },
+  { text: 5 },
+  { text: 6 },
+  { text: "-", id: "minus" },
+  { text: 1 },
+  { text: 2 },
+  { text: 3 },
+  { text: "+", id: "plus" },
+  { text: 0 },
+  { text: ".", id: "decimal" },
+  { text: "=", id: "equal" },
 ];
 
 const OPERATORS = ["plus", "minus", "multiply", "divide", "equal"];
 const OTHERS = ["ac", "sign", "percent"];
 
 function findDisplayText(keyId) {
-    const id = keyId.split("-")[1];
-    assignedKey = SYMBOLS.find((item) => item.id === id);
-    return assignedKey.text;
+  const id = keyId.split("-")[1];
+  assignedKey = SYMBOLS.find((item) => item.id === id);
+  return assignedKey.text;
 }
 
 const notNull = (item) => item || item === 0;
 const applySign = (state) => {
-    if (notNull(state.second)) state;
+  if (notNull(state.second)) state;
 };
 
 const isNumber = (item) => notNull(parseFloat(item));
 const isOperand = (item) =>
-    ["plus", "minus", "multiply", "divide", "equal"].includes(item);
+  ["plus", "minus", "multiply", "divide", "equal"].includes(item);
 
 /*
 We handle the logic using some form of a stack. The idea is to 
@@ -63,9 +63,9 @@ We look at the top of the stack and resolve the expression at the top.
 */
 
 const evaluateStack = function (stack) {
-    let newStack;
+  let newStack;
 
-    /*
+  /*
         Every time an operand key is pressed, an evaluation of the stack
         is triggered. We extract which operand key was pressed by the user and
         do necessary calculation on the stack and return in back for further inputs.
@@ -102,51 +102,58 @@ const evaluateStack = function (stack) {
 
         Let's implement this behavior step by step below.
     */
-    let currentOp = stack.pop(); // Extract the last key (operand) and remove it from the stack
+  let currentOp = stack.pop(); // Extract the last key (operand) and remove it from the stack
 
-    // Let's first handle the latter case
-    // debugger;
-    if (currentOp === "sign") {
-        newStack = stack.slice(); // make a copy of the actual stack
+  // Let's first handle the latter case
+  // debugger;
+  if (currentOp === "sign") {
+    newStack = stack.slice(); // make a copy of the actual stack
 
-        /*
+    /*
             we will keep popping the last element of the stack until we get a number.
             we shall keep track of the elements being popped as they need to be put back
             in the stack. If you are confused please read the description above on behavior
             of the 'sign' operator.
         */
-        toBeAppended = [];
-        while (true) {
-            lastElem = newStack.pop();
-            if (isNumber(lastElem)) {
-                toBeAppended.unshift(lastElem * -1); // unshift to preserve the order
-                break;
-            } else toBeAppended.unshift(lastElem);
-        }
-        newStack = [...newStack, ...toBeAppended];
-        return newStack;
+    toBeAppended = [];
+    while (true) {
+      lastElem = newStack.pop();
+      if (isNumber(lastElem)) {
+        toBeAppended.unshift(lastElem * -1); // unshift to preserve the order
+        break;
+      } else toBeAppended.unshift(lastElem);
     }
+    newStack = [...newStack, ...toBeAppended];
+    return newStack;
+  }
 
-    let history = stack.slice(-3);
-    switch (history.length) {
-        case 1:
-            newStack = history.slice();
-            break;
+  let history = stack.slice(-3);
 
-        // Two possibilities - [number, op] or [number, number]
-        // we can ignore the previous numbers in a series of
-        // consecutive numbers
-        case 2:
-            if (currentOp === "equal") {
-                if (isOperand(history[1]))
-                    newStack = [calculate(history[0], history[0], history[1])];
-            } else
-                newStack = notNull(parseFloat(history[1]))
-                    ? [history[1]]
-                    : [history[0]];
-            break;
+  switch (history.length) {
+    case 1:
+      if (currentOp === "percent") newStack = [history[0] / 100];
+      else newStack = history.slice();
+      break;
 
-        /*
+    // Two possibilities - [number, op] or [number, number]
+    // we can ignore the previous numbers in a series of
+    // consecutive numbers
+    case 2:
+      if (currentOp === "equal") {
+        if (isOperand(history[1]))
+          newStack = [calculate(history[0], history[0], history[1])];
+      } else if (currentOp == "percent") {
+        newStack = history.slice();
+        if (history[1] === "plus" || history[1] === "minus")
+          newStack.push((history[0] / 100) * history[0]);
+        else newStack.push(history[0] / 100);
+      } else
+        newStack = notNull(parseFloat(history[1]))
+          ? [history[1]]
+          : [history[0]];
+      break;
+
+    /*
             Four possibilities here
             1. [number, number, number] 
                  this could be done through repeatedly pressing the sign button.
@@ -163,56 +170,64 @@ const evaluateStack = function (stack) {
                 This is a valid calculation stack. so we apply the operation and the
                 new stack will only contain the result of the operation
             */
-        case 3:
-            if (
-                isNumber(history[0]) &&
-                isNumber(history[1]) &&
-                isNumber(history[2])
-            )
-                newStack = [history[2]];
-            else if (
-                isNumber(history[0]) &&
-                isNumber(history[1]) &&
-                isOperand(history[2])
-            )
-                newStack = [history[1]];
-            else if (
-                isOperand(history[0]) &&
-                isNumber(history[1]) &&
-                isNumber(history[2])
-            )
-                newStack = [history[2]];
-            else {
-                let result = calculate(history[0], history[2], history[1]);
-                newStack = [result];
-            }
-            break;
-    }
+    case 3:
+      if (currentOp === "percent") {
+        let pct = history.pop();
+        newStack = history.slice();
+        if (history[1] === "plus" || history[1] === "minus")
+          newStack.push((pct / 100) * history[0]);
+        else newStack.push(pct / 100);
+      } else if (
+        isNumber(history[0]) &&
+        isNumber(history[1]) &&
+        isNumber(history[2])
+      )
+        newStack = [history[2]];
+      else if (
+        isNumber(history[0]) &&
+        isNumber(history[1]) &&
+        isOperand(history[2])
+      )
+        newStack = [history[1]];
+      else if (
+        isOperand(history[0]) &&
+        isNumber(history[1]) &&
+        isNumber(history[2])
+      )
+        newStack = [history[2]];
+      else {
+        let result = calculate(history[0], history[2], history[1]);
+        newStack = [result];
+      }
+      break;
+  }
 
-    if (currentOp !== "equal") newStack.push(currentOp);
-    return newStack;
+  if (currentOp !== "equal" && currentOp !== "percent")
+    // These operands resolve instantly
+    newStack.push(currentOp);
+  return newStack;
 };
 
 const calculate = function (num1, num2, op) {
-    {
-        switch (op) {
-            case "plus":
-                return num1 + num2;
+  {
+    switch (op) {
+      case "plus":
+        return num1 + num2;
 
-            case "minus":
-                return num1 - num2;
+      case "minus":
+        return num1 - num2;
 
-            case "multiply":
-                return num1 * num2;
+      case "multiply":
+        return num1 * num2;
 
-            case "divide":
-                if (num2 === 0) {
-                    alert("Ugly baby judges you!");
-                    return;
-                }
-                return num1 / num2;
+      case "divide":
+        if (num2 === 0) {
+          alert("Ugly baby judges you!");
+          return;
         }
+        return num1 / num2;
     }
+  }
 };
 
 // console.log(evaluateStack([7, "sign"]));
