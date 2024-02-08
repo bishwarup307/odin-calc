@@ -5,9 +5,9 @@ const keysContainer = document.querySelector(".keys-container");
 const display = document.querySelector(".display-container");
 const liveCalc = document.querySelector(".calc");
 
-let firstNumber = 0;
-let secondNumber;
-let operands = [];
+// let firstNumber = 0;
+// let secondNumber;
+// let operands = [];
 
 let stack = [0];
 
@@ -234,7 +234,7 @@ const calculate = function (num1, num2, op) {
             case "divide":
                 if (num2 === 0) {
                     alert("Ugly baby judges you!");
-                    return;
+                    return num1;
                 }
                 return num1 / num2;
         }
@@ -370,38 +370,3 @@ window.addEventListener("keyup", (event) => {
         } // we want to prevent updating the display when the buffer is an empty string
     }
 });
-
-// let buffer = "";
-// let displayText;
-
-// keysContainer.addEventListener("click", (event) => {
-//     // displayText = findDisplayText(event.target.id);
-
-//     // debugger;
-//     displayText = findDisplayText(event.target.id);
-//     liveCalc.innerHTML += displayText;
-
-//     if (event.target.classList.contains("number-key")) {
-//         buffer += displayText;
-//     } else {
-//         operands.push(event.target.id.split("-")[1]);
-
-//         if (operands.length === 0) return;
-
-//         if (operands.length === 1) {
-//             firstNumber = parseFloat(buffer);
-//             buffer = "";
-//         } else {
-//             secondNumber = parseFloat(buffer);
-//             firstNumber = calculate(firstNumber, secondNumber, operands[0]);
-//             secondNumber = null;
-//             buffer = "";
-//             operands.shift();
-//         }
-//     }
-//     console.log("first number: " + firstNumber);
-//     console.log("second number: " + secondNumber);
-//     console.log(operands);
-// });
-
-// module.exports = evaluateStack;
