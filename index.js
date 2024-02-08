@@ -359,6 +359,15 @@ keysContainer.addEventListener("click", (event) => {
     }
 });
 
+window.addEventListener("keyup", (event) => {
+    if (event.key === "Backspace" || event.key === "Delete") {
+        if (buffer) {
+            buffer = buffer.slice(0, -1) || 0;
+            updateLiveDisplay(buffer);
+        } // we want to prevent updating the display when the buffer is an empty string
+    }
+});
+
 // let buffer = "";
 // let displayText;
 
