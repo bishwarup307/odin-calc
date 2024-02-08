@@ -59,6 +59,96 @@ const isNumber = (item) => notNull(parseFloat(item));
 const isOperand = (item) =>
     ["plus", "minus", "multiply", "divide", "equal"].includes(item);
 
+// Builds the keys on the calculator, the code below is pretty self-explanatory
+function makeKeyGrid() {
+    const placeHolder = document.createDocumentFragment();
+
+    SYMBOLS.forEach((symbol) => {
+        key = document.createElement("div");
+        key.innerHTML = symbol.text;
+        key.classList.add("key");
+        if (!symbol.id) {
+            key.classList.add("number-key");
+            symbol.id = `${symbol.text}`;
+        }
+
+        if (symbol.id === "decimal") key.classList.add("number-key");
+
+        if (OPERATORS.includes(symbol.id)) key.classList.add("operator-key");
+        if (OTHERS.includes(symbol.id)) key.classList.add("other-key");
+
+        key.id = `key-${symbol.id}`;
+        placeHolder.appendChild(key);
+    });
+
+    keysContainer.appendChild(placeHolder);
+}
+
+makeKeyGrid();
+const acKey = document.querySelector("#key-ac");
+
+function keyDownEffect(event) {
+    event.target.style.opacity = 0.6;
+}
+
+function keyUpEffect(event) {
+    setTimeout(() => (event.target.style.opacity = 1), 80);
+}
+
+/*
+  We are assigning keyboard keys to the buttons to make
+  user able to type their expression in addition to
+  clicking the key buttons
+*/
+keysContainer.addEventListener("click", keyDownEffect);
+keysContainer.addEventListener("click", keyUpEffect);
+
+window.addEventListener("keyup", (event) => {
+    let elem;
+
+    switch (event.key) {
+        case ".":
+            elem = document.querySelector("#key-decimal");
+            break;
+
+        case "c":
+            elem = document.querySelector("#key-ac");
+            break;
+
+        case "=":
+        case "Enter":
+            elem = document.querySelector("#key-equal");
+            break;
+
+        case "+":
+            elem = document.querySelector("#key-plus");
+            break;
+
+        case "-":
+        case "_":
+            elem = document.querySelector("#key-minus");
+            break;
+
+        case "/":
+            elem = document.querySelector("#key-divide");
+            break;
+
+        case "*":
+        case "x":
+            elem = document.querySelector("#key-multiply");
+            break;
+
+        case "%":
+            elem = document.querySelector("#key-percent");
+            break;
+
+        default:
+            elem = document.querySelector(`#key-${event.key}`);
+    }
+
+    if (elem) elem.click();
+});
+
 /*
 We handle the logic using some form of a stack. The idea is to 
 1. Hold user's input in a buffer
@@ -115,11 +205,17 @@ const evaluateStack = function (stack) {
 
     let currentOp = stack.pop(); // Extract the last key (operand) and remove it from the stack
 
-    // First of all if the user presses AC/C let's just make the whole stack go back to 0
-    // we shall come back here and implement the subtle differences between C and AC later
-    // TODO: implement the difference between C and AC
-
-    if (currentOp === "ac") return [0];
+    // First of all if the user presses AC/C
+    if (currentOp === "ac") {
+        // If the key is C, remove the most recent item from the calculation stack
+        if (acKey.classList.contains("active")) {
+            acKey.classList.remove("active");
+            acKey.textContent = "AC";
+            let lastItem = stack.pop();
+            if (isNumber(lastItem)) updateLiveDisplay("0");
+            return stack;
+        } else return ["0"]; // Otherwise, erase the complete memory
+    }
 
     // Now, let's first handle sign operator
     // debugger;
@@ -249,103 +345,17 @@ const calculate = function (num1, num2, op) {
     }
 };
 
-// Builds the keys on the calculator, the code below is pretty self-explanatory
-function makeKeyGrid() {
-    const placeHolder = document.createDocumentFragment();
-
-    SYMBOLS.forEach((symbol) => {
-        key = document.createElement("div");
-        key.innerHTML = symbol.text;
-        key.classList.add("key");
-        if (!symbol.id) {
-            key.classList.add("number-key");
-            symbol.id = `${symbol.text}`;
-        }
-
-        if (symbol.id === "decimal") key.classList.add("number-key");
-
-        if (OPERATORS.includes(symbol.id)) key.classList.add("operator-key");
-        if (OTHERS.includes(symbol.id)) key.classList.add("other-key");
-
-        key.id = `key-${symbol.id}`;
-        placeHolder.appendChild(key);
-    });
-
-    keysContainer.appendChild(placeHolder);
-}
-
-makeKeyGrid();
-
-function keyDownEffect(event) {
-    event.target.style.opacity = 0.6;
-}
-
-function keyUpEffect(event) {
-    setTimeout(() => (event.target.style.opacity = 1), 80);
-}
-
-/*
-  We are assigning keyboard keys to the buttons to make
-  user able to type their expression in addition to
-  clicking the key buttons
-*/
-keysContainer.addEventListener("click", keyDownEffect);
-keysContainer.addEventListener("click", keyUpEffect);
-
-window.addEventListener("keyup", (event) => {
-    let elem;
-
-    switch (event.key) {
-        case ".":
-            elem = document.querySelector("#key-decimal");
-            break;
-
-        case "c":
-            elem = document.querySelector("#key-ac");
-            break;
-
-        case "=":
-        case "Enter":
-            elem = document.querySelector("#key-equal");
-            break;
-
-        case "+":
-            elem = document.querySelector("#key-plus");
-            break;
-
-        case "-":
-        case "_":
-            elem = document.querySelector("#key-minus");
-            break;
-
-        case "/":
-            elem = document.querySelector("#key-divide");
-            break;
-
-        case "*":
-        case "x":
-            elem = document.querySelector("#key-multiply");
-            break;
-
-        case "%":
-            elem = document.querySelector("#key-percent");
-            break;
-
-        default:
-            elem = document.querySelector(`#key-${event.key}`);
-    }
-
-    if (elem) elem.click();
-});
-
 let buffer = "";
 keysContainer.addEventListener("click", (event) => {
+    if (!acKey.classList.contains("active") && event.target.id !== "key-ac") {
+        acKey.textContent = "C";
+        acKey.classList.add("active");
+    }
     // As long as the user keeps pressing number, we record the inputs
     // into a buffer
     if (event.target.classList.contains("number-key")) {
         buffer += findDisplayText(event.target.id);
         buffer = buffer.replace(/[.]+/g, "."); // The user may mistakenly (or not) type multiple "." characters
-        console.log(buffer);
         updateLiveDisplay(parseFloat(buffer));
     } else {
         // if the user presses an operator key a calculation is triggered
