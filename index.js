@@ -336,6 +336,8 @@ keysContainer.addEventListener("click", (event) => {
     // into a buffer
     if (event.target.classList.contains("number-key")) {
         buffer += findDisplayText(event.target.id);
+        buffer = buffer.replace(/[.]+/g, "."); // The user may mistakenly (or not) type multiple "." characters
+        console.log(buffer);
         updateLiveDisplay(parseFloat(buffer));
     } else {
         // if the user presses an operator key a calculation is triggered
@@ -359,6 +361,7 @@ keysContainer.addEventListener("click", (event) => {
     }
 });
 
+// Enable user to press backspace or delete button to remove the input
 window.addEventListener("keyup", (event) => {
     if (event.key === "Backspace" || event.key === "Delete") {
         if (buffer) {
