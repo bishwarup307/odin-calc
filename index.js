@@ -1,6 +1,8 @@
 const DIVIDE_TEXT = "&#xF7";
 const MULTIPLY_TEXT = "&times";
 
+// const FLOATING_POINT_PRECISION_DIGITS =
+
 const keysContainer = document.querySelector(".keys-container");
 const display = document.querySelector(".display-container");
 const liveCalc = document.querySelector(".calc");
@@ -43,6 +45,12 @@ function findDisplayText(keyId) {
 }
 
 const updateLiveDisplay = function (text) {
+    let total_digits = `${text}`.length;
+    if (total_digits > 20) liveCalc.style.fontSize = "1.2rem";
+    else if (total_digits > 15) liveCalc.style.fontSize = "1.5rem";
+    else if (total_digits > 10) liveCalc.style.fontSize = "2rem";
+    else liveCalc.style = "";
+
     liveCalc.innerHTML = parseFloat(text);
 };
 
