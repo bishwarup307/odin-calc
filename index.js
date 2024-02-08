@@ -12,40 +12,44 @@ let operands = [];
 let stack = [0];
 
 const SYMBOLS = [
-  { text: "AC", id: "ac" },
-  { text: "+/-", id: "sign" },
-  { text: "%", id: "percent" },
-  { text: DIVIDE_TEXT, id: "divide" },
-  { text: 7 },
-  { text: 8 },
-  { text: 9 },
-  { text: MULTIPLY_TEXT, id: "multiply" },
-  { text: 4 },
-  { text: 5 },
-  { text: 6 },
-  { text: "-", id: "minus" },
-  { text: 1 },
-  { text: 2 },
-  { text: 3 },
-  { text: "+", id: "plus" },
-  { text: 0 },
-  { text: ".", id: "decimal" },
-  { text: "=", id: "equal" },
+    { text: "AC", id: "ac" },
+    { text: "+/-", id: "sign" },
+    { text: "%", id: "percent" },
+    { text: DIVIDE_TEXT, id: "divide" },
+    { text: 7 },
+    { text: 8 },
+    { text: 9 },
+    { text: MULTIPLY_TEXT, id: "multiply" },
+    { text: 4 },
+    { text: 5 },
+    { text: 6 },
+    { text: "-", id: "minus" },
+    { text: 1 },
+    { text: 2 },
+    { text: 3 },
+    { text: "+", id: "plus" },
+    { text: 0 },
+    { text: ".", id: "decimal" },
+    { text: "=", id: "equal" },
 ];
 
 const OPERATORS = ["plus", "minus", "multiply", "divide", "equal"];
 const OTHERS = ["ac", "sign", "percent"];
 
 function findDisplayText(keyId) {
-  const id = keyId.split("-")[1];
-  assignedKey = SYMBOLS.find((item) => item.id === id);
-  return assignedKey.text;
+    const id = keyId.split("-")[1];
+    assignedKey = SYMBOLS.find((item) => item.id === id);
+    return assignedKey.text;
 }
+
+const updateLiveDisplay = function (text) {
+    liveCalc.innerHTML = parseFloat(text);
+};
 
 const notNull = (item) => item || item === 0;
 const isNumber = (item) => notNull(parseFloat(item));
 const isOperand = (item) =>
-  ["plus", "minus", "multiply", "divide", "equal"].includes(item);
+    ["plus", "minus", "multiply", "divide", "equal"].includes(item);
 
 /*
 We handle the logic using some form of a stack. The idea is to 
@@ -61,9 +65,9 @@ We look at the top of the stack and resolve the expression at the top.
 */
 
 const evaluateStack = function (stack) {
-  let newStack;
+    let newStack;
 
-  /*
+    /*
         Every time an operand key is pressed, an evaluation of the stack
         is triggered. We extract which operand key was pressed by the user and
         do necessary calculation on the stack and return in back for further inputs.
@@ -101,64 +105,66 @@ const evaluateStack = function (stack) {
         Let's implement this behavior step by step below.
     */
 
-  let currentOp = stack.pop(); // Extract the last key (operand) and remove it from the stack
+    let currentOp = stack.pop(); // Extract the last key (operand) and remove it from the stack
 
-  // First of all if the user presses AC/C let's just make the whole stack go back to 0
-  // we shall come back here and implement the subtle differences between C and AC later
-  // TODO: implement the difference between C and AC
+    // First of all if the user presses AC/C let's just make the whole stack go back to 0
+    // we shall come back here and implement the subtle differences between C and AC later
+    // TODO: implement the difference between C and AC
 
-  if (currentOp === "ac") return [0];
+    if (currentOp === "ac") return [0];
 
-  // Now, let's first handle sign operator
-  // debugger;
-  if (currentOp === "sign") {
-    newStack = stack.slice(); // make a copy of the actual stack
+    // Now, let's first handle sign operator
+    // debugger;
+    if (currentOp === "sign") {
+        newStack = stack.slice(); // make a copy of the actual stack
 
-    /*
+        /*
             we will keep popping the last element of the stack until we get a number.
             we shall keep track of the elements being popped as they need to be put back
             in the stack. If you are confused please read the description above on behavior
             of the 'sign' operator.
         */
-    toBeAppended = [];
-    while (true) {
-      lastElem = newStack.pop();
-      if (isNumber(lastElem)) {
-        toBeAppended.unshift(lastElem * -1); // unshift to preserve the order
-        break;
-      } else toBeAppended.unshift(lastElem);
+        toBeAppended = [];
+        while (true) {
+            lastElem = newStack.pop();
+            if (isNumber(lastElem)) {
+                toBeAppended.unshift(lastElem * -1); // unshift to preserve the order
+                break;
+            } else toBeAppended.unshift(lastElem);
+        }
+        newStack = [...newStack, ...toBeAppended];
+        return newStack;
     }
-    newStack = [...newStack, ...toBeAppended];
-    return newStack;
-  }
 
-  let history = stack.slice(-3);
+    let history = stack.slice(-3);
 
-  switch (history.length) {
-    case 1:
-      if (currentOp === "percent") newStack = [history[0] / 100];
-      else newStack = history.slice();
-      break;
+    switch (history.length) {
+        case 1:
+            if (currentOp === "percent") newStack = [history[0] / 100];
+            else newStack = history.slice();
+            break;
 
-    // Two possibilities - [number, op] or [number, number]
-    // we can ignore the previous numbers in a series of
-    // consecutive numbers
-    case 2:
-      if (currentOp === "equal") {
-        if (isOperand(history[1]))
-          newStack = [calculate(history[0], history[0], history[1])];
-      } else if (currentOp == "percent") {
-        newStack = history.slice();
-        if (history[1] === "plus" || history[1] === "minus")
-          newStack.push((history[0] / 100) * history[0]);
-        else newStack.push(history[0] / 100);
-      } else
-        newStack = notNull(parseFloat(history[1]))
-          ? [history[1]]
-          : [history[0]];
-      break;
+        // Two possibilities - [number, op] or [number, number]
+        // we can ignore the previous numbers in a series of
+        // consecutive numbers
+        case 2:
+            if (currentOp === "equal") {
+                if (isOperand(history[1]))
+                    newStack = [calculate(history[0], history[0], history[1])];
+                else newStack = [history[1]];
+            } else if (currentOp == "percent") {
+                newStack = history.slice();
+                if (history.every(isNumber)) newStack = [history[1] / 100];
+                else if (history[1] === "plus" || history[1] === "minus")
+                    newStack.push((history[0] / 100) * history[0]);
+                else newStack.push(history[0] / 100);
+            } else
+                newStack = notNull(parseFloat(history[1]))
+                    ? [history[1]]
+                    : [history[0]];
+            break;
 
-    /*
+        /*
             Four possibilities here
             1. [number, number, number] 
                  this could be done through repeatedly pressing the sign button.
@@ -175,99 +181,99 @@ const evaluateStack = function (stack) {
                 This is a valid calculation stack. so we apply the operation and the
                 new stack will only contain the result of the operation
             */
-    case 3:
-      if (currentOp === "percent") {
-        let pct = history.pop();
-        newStack = history.slice();
-        if (history[1] === "plus" || history[1] === "minus")
-          newStack.push((pct / 100) * history[0]);
-        else newStack.push(pct / 100);
-      } else if (
-        isNumber(history[0]) &&
-        isNumber(history[1]) &&
-        isNumber(history[2])
-      )
-        newStack = [history[2]];
-      else if (
-        isNumber(history[0]) &&
-        isNumber(history[1]) &&
-        isOperand(history[2])
-      )
-        newStack = [history[1]];
-      else if (
-        isOperand(history[0]) &&
-        isNumber(history[1]) &&
-        isNumber(history[2])
-      )
-        newStack = [history[2]];
-      else {
-        let result = calculate(history[0], history[2], history[1]);
-        newStack = [result];
-      }
-      break;
-  }
+        case 3:
+            if (currentOp === "percent") {
+                let pct = history.pop();
+                newStack = history.slice();
+                if (history[1] === "plus" || history[1] === "minus")
+                    newStack.push((pct / 100) * history[0]);
+                else newStack.push(pct / 100);
+            } else if (
+                isNumber(history[0]) &&
+                isNumber(history[1]) &&
+                isNumber(history[2])
+            )
+                newStack = [history[2]];
+            else if (
+                isNumber(history[0]) &&
+                isNumber(history[1]) &&
+                isOperand(history[2])
+            )
+                newStack = [history[1]];
+            else if (
+                isOperand(history[0]) &&
+                isNumber(history[1]) &&
+                isNumber(history[2])
+            )
+                newStack = [history[2]];
+            else {
+                let result = calculate(history[0], history[2], history[1]);
+                newStack = [result];
+            }
+            break;
+    }
 
-  if (currentOp !== "equal" && currentOp !== "percent")
-    // These operands resolve instantly
-    newStack.push(currentOp);
-  return newStack;
+    if (currentOp !== "equal" && currentOp !== "percent")
+        // These operands resolve instantly
+        newStack.push(currentOp);
+    return newStack;
 };
 
 const calculate = function (num1, num2, op) {
-  {
-    switch (op) {
-      case "plus":
-        return num1 + num2;
+    {
+        switch (op) {
+            case "plus":
+                return num1 + num2;
 
-      case "minus":
-        return num1 - num2;
+            case "minus":
+                return num1 - num2;
 
-      case "multiply":
-        return num1 * num2;
+            case "multiply":
+                return num1 * num2;
 
-      case "divide":
-        if (num2 === 0) {
-          alert("Ugly baby judges you!");
-          return;
+            case "divide":
+                if (num2 === 0) {
+                    alert("Ugly baby judges you!");
+                    return;
+                }
+                return num1 / num2;
         }
-        return num1 / num2;
     }
-  }
 };
 
 // Builds the keys on the calculator, the code below is pretty self-explanatory
 function makeKeyGrid() {
-  const placeHolder = document.createDocumentFragment();
+    const placeHolder = document.createDocumentFragment();
 
-  SYMBOLS.forEach((symbol) => {
-    key = document.createElement("div");
-    key.innerHTML = symbol.text;
-    key.classList.add("key");
-    if (!symbol.id) {
-      key.classList.add("number-key");
-      symbol.id = `${symbol.text}`;
-    }
+    SYMBOLS.forEach((symbol) => {
+        key = document.createElement("div");
+        key.innerHTML = symbol.text;
+        key.classList.add("key");
+        if (!symbol.id) {
+            key.classList.add("number-key");
+            symbol.id = `${symbol.text}`;
+        }
 
-    if (symbol.id === "decimal") key.classList.add("number-key");
+        if (symbol.id === "decimal") key.classList.add("number-key");
 
-    if (OPERATORS.includes(symbol.id)) key.classList.add("operator-key");
-    if (OTHERS.includes(symbol.id)) key.classList.add("other-key");
+        if (OPERATORS.includes(symbol.id)) key.classList.add("operator-key");
+        if (OTHERS.includes(symbol.id)) key.classList.add("other-key");
 
-    key.id = `key-${symbol.id}`;
-    placeHolder.appendChild(key);
-  });
+        key.id = `key-${symbol.id}`;
+        placeHolder.appendChild(key);
+    });
 
-  keysContainer.appendChild(placeHolder);
+    keysContainer.appendChild(placeHolder);
 }
 
 makeKeyGrid();
 
 function keyDownEffect(event) {
-  event.target.style.opacity = 0.6;
+    event.target.style.opacity = 0.6;
 }
 
 function keyUpEffect(event) {
-  setTimeout(() => (event.target.style.opacity = 1), 80);
+    setTimeout(() => (event.target.style.opacity = 1), 80);
 }
 
 /*
@@ -279,73 +285,78 @@ keysContainer.addEventListener("click", keyDownEffect);
 keysContainer.addEventListener("click", keyUpEffect);
 
 window.addEventListener("keyup", (event) => {
-  let elem;
+    let elem;
 
-  switch (event.key) {
-    case ".":
-      elem = document.querySelector("#key-decimal");
-      break;
+    switch (event.key) {
+        case ".":
+            elem = document.querySelector("#key-decimal");
+            break;
 
-    case "c":
-      elem = document.querySelector("#key-ac");
-      break;
+        case "c":
+            elem = document.querySelector("#key-ac");
+            break;
 
-    case "=":
-    case "Enter":
-      elem = document.querySelector("#key-equal");
-      break;
+        case "=":
+        case "Enter":
+            elem = document.querySelector("#key-equal");
+            break;
 
-    case "+":
-      elem = document.querySelector("#key-plus");
-      break;
+        case "+":
+            elem = document.querySelector("#key-plus");
+            break;
 
-    case "-":
-    case "_":
-      elem = document.querySelector("#key-minus");
-      break;
+        case "-":
+        case "_":
+            elem = document.querySelector("#key-minus");
+            break;
 
-    case "/":
-      elem = document.querySelector("#key-divide");
-      break;
+        case "/":
+            elem = document.querySelector("#key-divide");
+            break;
 
-    case "*":
-    case "x":
-      elem = document.querySelector("#key-multiply");
-      break;
+        case "*":
+        case "x":
+            elem = document.querySelector("#key-multiply");
+            break;
 
-    case "%":
-      elem = document.querySelector("#key-percent");
-      break;
+        case "%":
+            elem = document.querySelector("#key-percent");
+            break;
 
-    default:
-      elem = document.querySelector(`#key-${event.key}`);
-  }
+        default:
+            elem = document.querySelector(`#key-${event.key}`);
+    }
 
-  if (elem) elem.click();
+    if (elem) elem.click();
 });
 
 let buffer = "";
 keysContainer.addEventListener("click", (event) => {
-  // As long as the user keeps pressing number, we record the inputs
-  // into a buffer
-  if (event.target.classList.contains("number-key")) {
-    buffer += findDisplayText(event.target.id);
-  } else {
-    // if the user presses an operator key a calculation is triggered
+    // As long as the user keeps pressing number, we record the inputs
+    // into a buffer
+    if (event.target.classList.contains("number-key")) {
+        buffer += findDisplayText(event.target.id);
+        updateLiveDisplay(parseFloat(buffer));
+    } else {
+        // if the user presses an operator key a calculation is triggered
 
-    /*
+        /*
       the user may press multiple operator key on a row. In that case
       the buffer will be empty and we don't want to keep pushing
       empty numbers (NaN) to the stack
     */
-    if (notNull(buffer)) stack.push(parseFloat(buffer));
-    stack.push(event.target.id.split("-")[1]);
+        if (notNull(buffer)) stack.push(parseFloat(buffer));
+        stack.push(event.target.id.split("-")[1]);
 
-    stack = evaluateStack(stack); // evaluate the stack, this is the meat of the program
-    buffer = ""; // reset the buffer after each evaluation
+        stack = evaluateStack(stack); // evaluate the stack, this is the meat of the program
+        let display = isNumber(stack.slice(-1)[0])
+            ? stack.slice(-1)[0]
+            : stack.slice(-2)[0];
+        updateLiveDisplay(display);
+        buffer = ""; // reset the buffer after each evaluation
 
-    console.log(stack);
-  }
+        console.log(stack);
+    }
 });
 
 // let buffer = "";
@@ -381,4 +392,4 @@ keysContainer.addEventListener("click", (event) => {
 //     console.log(operands);
 // });
 
-module.exports = evaluateStack;
+// module.exports = evaluateStack;
