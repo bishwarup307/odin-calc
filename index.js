@@ -137,7 +137,13 @@ const evaluateStack = function (stack) {
         // we can ignore the previous numbers in a series of
         // consecutive numbers
         case 2:
-            result = notNull(parseFloat(history[1])) ? history[1] : history[0];
+            if (currentOp === "equal") {
+                if (isOperand(history[1]))
+                    newStack = [calculate(history[0], history[0], history[1])];
+            } else
+                newStack = notNull(parseFloat(history[1]))
+                    ? [history[1]]
+                    : [history[0]];
             break;
 
         /*
