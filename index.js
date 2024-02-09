@@ -54,6 +54,16 @@ const updateLiveDisplay = function (text) {
     liveCalc.innerHTML = parseFloat(text);
 };
 
+const displayStack = function (array) {
+    let display;
+    if (!array.length) display = "0";
+    else
+        display = isNumber(stack.slice(-1)[0])
+            ? stack.slice(-1)[0]
+            : stack.slice(-2)[0];
+    updateLiveDisplay(display);
+};
+
 const notNull = (item) => item || item === 0;
 const isNumber = (item) => notNull(parseFloat(item));
 const isOperand = (item) =>
@@ -212,9 +222,16 @@ const evaluateStack = function (stack) {
             acKey.classList.remove("active");
             acKey.textContent = "AC";
             let lastItem = stack.pop();
+            /*
+                If the user typed a number and presses C that should change the
+                display to 0. However, if the user typed in a number followed by
+                an operand e.g., '6' and then '+', the display already shows '6' 
+                and we want to just remove the '+' from the stack and keep the 
+                display as is.
+            */
             if (isNumber(lastItem)) updateLiveDisplay("0");
             return stack;
-        } else return ["0"]; // Otherwise, erase the complete memory
+        } else return [0]; // Otherwise, erase the complete memory
     }
 
     // Now, let's first handle sign operator
@@ -355,7 +372,7 @@ keysContainer.addEventListener("click", (event) => {
     // into a buffer
     if (event.target.classList.contains("number-key")) {
         buffer += findDisplayText(event.target.id);
-        console.log(buffer);
+        if (buffer.startsWith(".")) buffer = "0" + buffer; // Having a pesky decimal at start will case the display to show NaN
         buffer = buffer.replace(/[.]+/g, "."); // The user may mistakenly (or not) type multiple "." characters
         updateLiveDisplay(parseFloat(buffer));
     } else {
@@ -370,10 +387,8 @@ keysContainer.addEventListener("click", (event) => {
         stack.push(event.target.id.split("-")[1]);
 
         stack = evaluateStack(stack); // evaluate the stack, this is the meat of the program
-        let display = isNumber(stack.slice(-1)[0])
-            ? stack.slice(-1)[0]
-            : stack.slice(-2)[0];
-        updateLiveDisplay(display);
+        displayStack(stack); //update the display based on the latest calculation
+
         buffer = ""; // reset the buffer after each evaluation
 
         console.log(stack);
