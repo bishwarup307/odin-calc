@@ -14,6 +14,7 @@ A sleek and user-friendly calculator app built with HTML, CSS, and JavaScript. T
 - Basic arithmetic operations: **Addition**, **Subtraction**, **Multiplication**, and **Division**.
 - Support for **sign (+/-)** change and **percentage (%)** calculations.
 - Keyboard support for all operations. ⌨️
+- Adaptive display font-size.
 
 ## Live Demo
 [Try it out 🚀](https://bishwarup307.github.io/odin-calc)
@@ -43,5 +44,7 @@ The application leverages a stack-based logic to process user inputs and calcula
   3. Operand-Number-Number sequence: Ignores the first operand, focusing on the last number.
   4. Number-Operand-Number sequence: Performs the operation and updates the stack with the result.
 
+
+🚀 The code is heavily commented for understanding and collaboration.
 
 #### Background image by [Gerd Altmann from Pixabay](https://pixabay.com/illustrations/pay-digit-number-abundance-count-1036469/)
