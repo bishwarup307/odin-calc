@@ -355,6 +355,7 @@ keysContainer.addEventListener("click", (event) => {
     // into a buffer
     if (event.target.classList.contains("number-key")) {
         buffer += findDisplayText(event.target.id);
+        console.log(buffer);
         buffer = buffer.replace(/[.]+/g, "."); // The user may mistakenly (or not) type multiple "." characters
         updateLiveDisplay(parseFloat(buffer));
     } else {
@@ -383,7 +384,7 @@ keysContainer.addEventListener("click", (event) => {
 window.addEventListener("keyup", (event) => {
     if (event.key === "Backspace" || event.key === "Delete") {
         if (buffer) {
-            buffer = buffer.slice(0, -1) || 0;
+            buffer = buffer.slice(0, -1) || "0";
             updateLiveDisplay(buffer);
         } // we want to prevent updating the display when the buffer is an empty string
     }
