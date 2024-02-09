@@ -1,6 +1,8 @@
 const DIVIDE_TEXT = "&#xF7";
 const MULTIPLY_TEXT = "&times";
 
+const FLOAT_NORMALIZER = 100_000_000;
+
 // const FLOATING_POINT_PRECISION_DIGITS =
 
 const keysContainer = document.querySelector(".keys-container");
@@ -62,6 +64,12 @@ const displayStack = function (array) {
             ? stack.slice(-1)[0]
             : stack.slice(-2)[0];
     updateLiveDisplay(display);
+};
+
+// Avoid showing unnecessary decimal points that results from floating point arithmetic
+// Try 0.6 * 9 or 0.6 / 6
+const normalizeFloat = function (number) {
+    return Math.round(number * FLOAT_NORMALIZER) / FLOAT_NORMALIZER;
 };
 
 const notNull = (item) => item || item === 0;
@@ -350,14 +358,14 @@ const calculate = function (num1, num2, op) {
                 return num1 - num2;
 
             case "multiply":
-                return num1 * num2;
+                return normalizeFloat(num1 * num2);
 
             case "divide":
                 if (num2 === 0) {
                     alert("Ugly baby judges you!");
                     return num1;
                 }
-                return num1 / num2;
+                return normalizeFloat(num1 / num2);
         }
     }
 };
